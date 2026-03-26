@@ -21,9 +21,9 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
 
     @Override
     public MaximumFlowData findMaximumFlowOf(DirectedGraph digraph, 
-                                           Integer source,
-                                          Integer sink,
-                                          CapacityFunction capacityFunction) {
+                                            Integer source,
+                                            Integer sink,
+                                            CapacityFunction capacityFunction) {
         
         Objects.requireNonNull(digraph, "The input DirectedGraph is null.");
         Objects.requireNonNull(source, "The source node is null.");
@@ -36,7 +36,7 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
                     "Both the source and sink nodes are the same.");
         }
         
-        long flow = 0L;
+        long maximumFlow = 0L;
         CapacityFunction c = capacityFunction; // Rename.
         FlowFunction f = new FlowFunction(digraph);
         List<Integer> path;
@@ -47,13 +47,15 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
                                           f, 
                                           c)) != null) {
             
-            flow += findMinimumArcsRemove(digraph,
-                                          path, 
-                                          f, 
-                                          c);
+//            System.out.println(path);
+            
+            maximumFlow += findMinimumArcsRemove(digraph,
+                                                 path, 
+                                                 f, 
+                                                 c);
         }
         
-        return createFlowData(flow, f);
+        return createFlowData(maximumFlow, f);
     }
     
     private List<Integer> findAugmentingPath(DirectedGraph digraph,
@@ -74,18 +76,18 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
                 return tracebackPath(current, parents);
             }
             
-            for (Integer child : digraph.getChildrenOf(current)) {
-                if (parents.containsKey(child)) {
+            for (Integer neighbor : digraph.getAllNeighboursOf(current)) {
+                if (parents.containsKey(neighbor)) {
                     continue;
                 }
                 
                 if (residualArcWeight(digraph, 
                                       current, 
-                                      child, 
+                                      neighbor, 
                                       f, 
                                       c) > 0L) {
-                    parents.put(child, current);
-                    queue.addLast(child);
+                    parents.put(neighbor, current);
+                    queue.addLast(neighbor);
                 }
             }
         }
@@ -99,10 +101,10 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
                                           FlowFunction f,
                                           CapacityFunction c) {
         if (graph.getChildrenOf(current).contains(child)) {
-            return c.getArcFlowValue(current, child) -
-                   f.getArcFlowValue(current, child);
+            return c.getArcCapacity(current, child) -
+                   f.getArcFlow(current, child);
         } else {
-            return f.getArcFlowValue(child, current);
+            return f.getArcFlow(child, current);
         }
     }
 
@@ -129,7 +131,14 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
         long minimumFlowValue = Long.MAX_VALUE;
         
         for (int i = 0; i < path.size() - 1; ++i) {
-            long w = residualArcWeight(digraph, i, i, f, c);
+            Integer u = path.get(i);
+            Integer v = path.get(i + 1);
+            
+            long w = residualArcWeight(digraph, 
+                                       u, 
+                                       v,
+                                       f, 
+                                       c);
             
             minimumFlowValue = Math.min(minimumFlowValue, w);
         }
@@ -137,7 +146,7 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
         for (int i = 0; i < path.size() - 1; ++i) {
             Integer current = path.get(i);
             Integer child   = path.get(i + 1);
-            long flow = f.getArcFlowValue(current, child);
+            long flow = f.getArcFlow(current, child);
             
             f.setArcFlowValue(current,
                               child,
@@ -146,4 +155,4 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
         
         return minimumFlowValue;
     }
-}
+}  

@@ -19,11 +19,11 @@ public final class CapacityFunction {
                 "The input DirectedGraph is null.");
     }
     
-    public void setArcWeight(int from, int to, long weight) {
+    public void setArcCapacity(Integer from, Integer to, Long weight) {
         map.computeIfAbsent(from, _ -> new HashMap<>()).put(to, weight);
     }
     
-    public long getArcFlowValue(int from, int to) {
+    public long getArcCapacity(Integer from, Integer to) {
         if (!digraph.isConnectedTo(from, to)) {
             return 0L;
         }

@@ -19,11 +19,25 @@ public final class FlowFunction {
             Objects.requireNonNull(
                 digraph,
                 "The input DirectedGraph is null.");
+        
+        for (Integer node : digraph.getNodes()) {
+            for (Integer child : digraph.getChildrenOf(node)) {
+                map.computeIfAbsent(node, _ -> new HashMap<>()).put(child, 0L);
+            }
+        }
     }
     
-    public long getArcFlowValue(Integer from, Integer to) {
+    public long getArcFlow(Integer from, Integer to) {
         if (!digraph.isConnectedTo(from, to)) {
             return 0L;
+        }
+        
+        if (map.get(from) == null) {
+            System.out.println("yeah");
+        }
+        
+        if (map.get(from).get(to) == null) {
+            System.out.println("fuck");
         }
         
         return map.get(from).get(to);
