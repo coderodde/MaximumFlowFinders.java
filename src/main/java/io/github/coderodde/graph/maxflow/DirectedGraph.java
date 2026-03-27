@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * 
  */
-public final class DirectedGraph {
+public final class DirectedGraph implements Iterable<Integer> {
 
     private final Map<Integer, Set<Integer>> childMap = new HashMap<>();
     private final Map<Integer, Set<Integer>> parentsMap = 
@@ -26,6 +26,10 @@ public final class DirectedGraph {
         addNode(to);
         childMap.get(from).add(to);
         parentsMap.get(to).add(from);
+    }
+    
+    public int getNumberOfNeighbours(Integer node) {
+        return childMap.get(node).size() + parentsMap.get(node).size();
     }
     
     public Set<Integer> getChildrenOf(Integer node) {
@@ -50,6 +54,15 @@ public final class DirectedGraph {
 
     Iterable<Integer> getNodes() {
         return childMap.keySet();
+    }
+
+    @Override
+    public Iterator<Integer> iterator() {
+        return childMap.keySet().iterator();
+    }
+
+    public int size() {
+        return childMap.size();
     }
     
     private final class AllNodeIterable implements Iterable<Integer> {

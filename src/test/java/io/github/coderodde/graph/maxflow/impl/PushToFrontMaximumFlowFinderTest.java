@@ -6,7 +6,7 @@ import io.github.coderodde.graph.maxflow.MaximumFlowData;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class EdmondsKarpMaximumFlowFinderTest {
+public class PushToFrontMaximumFlowFinderTest {
 
     @Test
     public void smallFlow() {

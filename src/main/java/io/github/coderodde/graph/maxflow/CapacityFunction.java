@@ -23,7 +23,7 @@ public final class CapacityFunction {
         map.computeIfAbsent(from, _ -> new HashMap<>()).put(to, weight);
     }
     
-    public long getArcCapacity(Integer from, Integer to) {
+    public Long getArcCapacity(Integer from, Integer to) {
         if (!digraph.isConnectedTo(from, to)) {
             return 0L;
         }
