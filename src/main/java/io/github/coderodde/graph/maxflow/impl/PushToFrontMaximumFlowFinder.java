@@ -14,7 +14,11 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- *
+ * This class implements
+ * <a href="https://en.wikipedia.org/wiki/Push%E2%80%93relabel_maximum_flow_algorithm#Relabel-to-front_selection_rule">
+ * Push-to-front algorithm
+ * </a>
+ * for maximum flow in flow networks.
  */
 public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
 

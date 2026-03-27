@@ -15,10 +15,16 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 
+ * This class implements
+ * <a href="https://en.wikipedia.org/wiki/Edmonds%E2%80%93Karp_algorithm">
+ * Edmonds-Karp algorithm
+ * </a> for finding maximum flow in a flow network.
  */
 public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
 
+    /**
+     * {@inheritDoc } 
+     */
     @Override
     public MaximumFlowData findMaximumFlowOf(DirectedGraph digraph, 
                                             Integer source,
@@ -46,8 +52,6 @@ public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
                                           sink,
                                           f, 
                                           c)) != null) {
-            
-//            System.out.println(path);
             
             maximumFlow += findMinimumArcsRemove(digraph,
                                                  path, 
