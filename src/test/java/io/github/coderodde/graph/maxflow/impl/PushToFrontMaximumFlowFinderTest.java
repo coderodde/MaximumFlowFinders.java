@@ -45,7 +45,7 @@ public class PushToFrontMaximumFlowFinderTest {
         cf.setArcCapacity(c, t, 4L);
         
         MaximumFlowData data = 
-            new EdmondsKarpMaximumFlowFinder()
+            new PushToFrontMaximumFlowFinder()
                 .findMaximumFlowOf(digraph, s, t, cf);
         
         assertEquals(7L, data.getMaximumFlow());
@@ -96,7 +96,7 @@ public class PushToFrontMaximumFlowFinderTest {
         cf.setArcCapacity(e, t, 2L);
 
         MaximumFlowData data =
-            new EdmondsKarpMaximumFlowFinder()
+            new PushToFrontMaximumFlowFinder()
                 .findMaximumFlowOf(digraph, s, t, cf);
 
         assertEquals(8L, data.getMaximumFlow());

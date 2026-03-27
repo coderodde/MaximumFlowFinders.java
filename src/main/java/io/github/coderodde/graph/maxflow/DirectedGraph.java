@@ -24,14 +24,21 @@ public final class DirectedGraph implements Iterable<Integer> {
             new HashMap<>();
     
     /**
+     * Constructs an empty digraph.
+     */
+    public DirectedGraph() {
+        
+    }
+    
+    /**
      * Makes sure that {@code nodeId} is included in this digraph. If it already
      * is, it's an no-op.
      * 
      * @param nodeId the node candidate. 
      */
     public void addNode(Integer nodeId) {
-        childMap  .computeIfAbsent(nodeId, _ -> new HashSet<>());
-        parentsMap.computeIfAbsent(nodeId, _ -> new HashSet<>());
+        childMap  .computeIfAbsent(nodeId, x -> new HashSet<>());
+        parentsMap.computeIfAbsent(nodeId, x -> new HashSet<>());
     }
     
     /**

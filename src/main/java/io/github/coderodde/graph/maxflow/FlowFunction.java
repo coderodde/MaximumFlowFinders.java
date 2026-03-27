@@ -29,7 +29,7 @@ public final class FlowFunction {
         for (Integer from : digraph) {
             for (Integer to : digraph.getChildrenOf(from)) {
                 map.get(from).put(to, 0L);
-                map.computeIfAbsent(to, _ -> new HashMap<>()).put(from, 0L);
+                map.computeIfAbsent(to, x -> new HashMap<>()).put(from, 0L);
             }
         }
     }

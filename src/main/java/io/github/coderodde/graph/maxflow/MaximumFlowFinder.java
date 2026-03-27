@@ -12,7 +12,7 @@ public interface MaximumFlowFinder {
      * @param souce            the source node.
      * @param sink             the sink node.
      * @param capacityFunction the capacity function.
-     * @return 
+     * @return the maximum flow data.
      */
     public MaximumFlowData findMaximumFlowOf(DirectedGraph digraph, 
                                              Integer souce,

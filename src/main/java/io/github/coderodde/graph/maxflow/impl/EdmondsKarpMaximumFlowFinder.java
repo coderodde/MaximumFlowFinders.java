@@ -23,6 +23,13 @@ import java.util.Objects;
 public final class EdmondsKarpMaximumFlowFinder implements MaximumFlowFinder {
 
     /**
+     * Constructs this maximum flow finder.
+     */
+    public EdmondsKarpMaximumFlowFinder() {
+        
+    }
+    
+    /**
      * {@inheritDoc } 
      */
     @Override

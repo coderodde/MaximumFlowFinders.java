@@ -11,12 +11,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class Benchmark {
+/**
+ * This class implements a simple performance comparison of the two maximum flow
+ * algorithm.
+ */
+public final class Benchmark {
 
     private static final int NODES = 300;
     private static final int ARCS = 60_000;
     private static final long MAXIMUM_FLOW = 20L;
     
+    private Benchmark() {
+        
+    }
+    
+    /**
+     * Runs this performance comparison.
+     * 
+     * @param args ignored.
+     */
     public static void main(String[] args) {
         long seed = System.currentTimeMillis();
         Random random = new Random(seed);

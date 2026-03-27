@@ -22,6 +22,13 @@ import java.util.Set;
  */
 public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
 
+    /**
+     * Constructs this maximum flow finder.
+     */
+    public PushToFrontMaximumFlowFinder() {
+        
+    }
+    
     @Override
     public MaximumFlowData findMaximumFlowOf(DirectedGraph digraph, 
                                              Integer source,
@@ -198,16 +205,8 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
             }
         }
         
-        if (minimumHeight == Integer.MAX_VALUE) {
-            throw new IllegalStateException("Cannot relabel a node " + u);
-        }
-        
         int oldHeight = height.get(u);
         int newHeight = minimumHeight + 1;
-        
-        if (newHeight <= oldHeight) {
-            throw new IllegalStateException("Should not get here.");
-        }
         
         height.put(u, newHeight);
     }
@@ -256,23 +255,6 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
             list.add(node);
             filter.add(node);
         }
-    }
-    
-    private static List<Integer> getResidualNeighbours(DirectedGraph digraph,
-                                                       Integer u) {
-        List<Integer> neighbours = new ArrayList<>();
-        Set<Integer> filter = new HashSet<>();
-        
-        for (Integer v : digraph.getAllNeighboursOf(u)) {
-            if (filter.contains(v)) {
-                continue;
-            }
-            
-            neighbours.add(v);
-            filter.add(v);
-        }
-        
-        return neighbours;
     }
     
     private static LinkedList buildLinkedList(DirectedGraph digraph,

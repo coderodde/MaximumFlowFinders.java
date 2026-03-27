@@ -39,7 +39,7 @@ public final class CapacityFunction {
      * @param capacity the capacity to set.
      */
     public void setArcCapacity(Integer from, Integer to, Long capacity) {
-        map.computeIfAbsent(from, _ -> new HashMap<>()).put(to, capacity);
+        map.computeIfAbsent(from, x -> new HashMap<>()).put(to, capacity);
     }
     
     /**
