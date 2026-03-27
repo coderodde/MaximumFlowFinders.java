@@ -11,36 +11,31 @@ public final class FlowFunction {
 
     public static final long NON_EXISTENT_WEIGHT = -1L;
     
-    private final DirectedGraph digraph;
     private final Map<Integer, Map<Integer, Long>> map = new HashMap<>();
         
     public FlowFunction(DirectedGraph digraph) {
-        this.digraph = 
-            Objects.requireNonNull(
-                digraph,
-                "The input DirectedGraph is null.");
+        Objects.requireNonNull(digraph, "The input DirectedGraph is null.");
         
-        for (Integer node : digraph.getNodes()) {
-            for (Integer child : digraph.getChildrenOf(node)) {
-                map.computeIfAbsent(node, _ -> new HashMap<>()).put(child, 0L);
+        for (Integer from : digraph) {
+            map.computeIfAbsent(from, x -> new HashMap<>());
+        }
+        
+        for (Integer from : digraph.getNodes()) {
+            for (Integer to : digraph.getChildrenOf(from)) {
+                map.get(from).put(to, 0L);
+                map.computeIfAbsent(to, x -> new HashMap<>()).put(from, 0L);
             }
         }
     }
     
     public long getArcFlow(Integer from, Integer to) {
-        if (!digraph.isConnectedTo(from, to)) {
+        Map<Integer, Long> innerMap = map.get(from);
+        
+        if (innerMap == null) {
             return 0L;
         }
         
-        if (map.get(from) == null) {
-            System.out.println("yeah");
-        }
-        
-        if (map.get(from).get(to) == null) {
-            System.out.println("fuck");
-        }
-        
-        return map.get(from).get(to);
+        return innerMap.getOrDefault(to, 0L);
     }
     
     public void setArcFlowValue(Integer from, Integer to, Long flow) {

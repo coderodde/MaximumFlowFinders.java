@@ -36,21 +36,22 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
         }
         
         CapacityFunction c = capacityFunction;
+        FlowFunction f = new FlowFunction(digraph);
+        
         Map<Integer, Long>    e = new HashMap<>(); // Excess function.
         Map<Integer, Integer> h = new HashMap<>(); // Height function.
         Map<Integer, Integer> currentNeighbourIndex = new HashMap<>();
-        FlowFunction f = new FlowFunction(digraph);
+        
+        Map<Integer, List<Integer>> neighbourMap = 
+            buildResidualNeighbourMap(digraph);
         
         initializePreflow(digraph, 
                           source,
                           e,
                           h,
+                          currentNeighbourIndex,
                           f,
                           c);
-        
-        for (Integer u : digraph) {
-            currentNeighbourIndex.put(u, 0);
-        }
         
         LinkedList list = buildLinkedList(digraph, 
                                           source, 
@@ -62,13 +63,13 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
             Integer u = node.node;
             Integer oldHeight = h.get(u);
             
-            discharge(digraph,
-                      u,
+            discharge(u,
                       f,
                       c,
                       e,
                       h,
-                      currentNeighbourIndex);
+                      currentNeighbourIndex,
+                      neighbourMap);
             
             LinkedListNode next = node.next;
             
@@ -80,28 +81,26 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
             node = next;
         }
         
-        long maximumFlowValue = e.get(sink);
+        long maximumFlowValue = e.getOrDefault(sink, 0L);
         
         return createFlowData(maximumFlowValue, f);
     }
 
-    private static void initializePreflow(DirectedGraph digraph,
-                                          Integer source,
-                                          Map<Integer, Long> excess,
-                                          Map<Integer, Integer> height, 
-                                          FlowFunction f,
-                                          CapacityFunction c) {
+    private static void initializePreflow(
+            DirectedGraph digraph,
+            Integer source,
+            Map<Integer, Long> excess,
+            Map<Integer, Integer> height,
+            Map<Integer, Integer> currentNeighbourIndex,
+            FlowFunction f,
+            CapacityFunction c) {
+        
         Integer s = source; // Alias.
         
         for (Integer u : digraph) {
             excess.put(u, 0L);
             height.put(u, 0);
-        }
-            
-        for (Integer u : digraph) {
-            for (Integer v : digraph) {
-                f.setArcFlowValue(u, v, 0L);
-            }
+            currentNeighbourIndex.put(u, 0);
         }
             
         height.put(s, digraph.size());
@@ -122,33 +121,31 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
     }
     
     private static void discharge(
-            DirectedGraph digraph,
             Integer u,
             FlowFunction f,
             CapacityFunction c,
             Map<Integer, Long> excess,
             Map<Integer, Integer> height,
-            Map<Integer, Integer> currentNeighbourIndex) {
+            Map<Integer, Integer> currentNeighbourIndex,
+            Map<Integer, List<Integer>> neighbourMap) {
         
-        List<Integer> neighbours = getResidualNeighbours(digraph, u);
+        List<Integer> neighbours = neighbourMap.get(u);
         
         while (excess.get(u) > 0L) {
-            Integer i = currentNeighbourIndex.get(u);
+            Integer index = currentNeighbourIndex.get(u);
             
-            if (i >= neighbours.size()) {
-                relabel(digraph,
-                        u,
+            if (index >= neighbours.size()) {
+                relabel(u,
                         f,
                         height,
-                        c);
+                        c,
+                        neighbourMap);
                 
                 currentNeighbourIndex.put(u, 0);
-                neighbours = getResidualNeighbours(digraph, u);
             } else {
-                Integer v = neighbours.get(i);
+                Integer v = neighbours.get(index);
                 
-                if (isAdmissible(digraph,
-                                 u,
+                if (isAdmissible(u,
                                  v,
                                  f, 
                                  height,
@@ -159,7 +156,7 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
                          excess,
                          c);
                 } else {
-                    currentNeighbourIndex.put(u, i + 1);
+                    currentNeighbourIndex.put(u, index + 1);
                 }
             }
         }
@@ -173,6 +170,10 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
         long residualCapacity = getResidualCapacity(u, v, f, c);
         long delta = Math.min(excess.get(u), residualCapacity);
         
+        if (delta == 0L) {
+            return;
+        }
+        
         f.setArcFlowValue(u, v, f.getArcFlow(u, v) + delta);
         f.setArcFlowValue(v, u, f.getArcFlow(v, u) - delta);
         
@@ -180,26 +181,34 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
         excess.put(v, excess.get(v) + delta);
     }
     
-    private static void relabel(DirectedGraph digraph,
-                                Integer u,
+    private static void relabel(Integer u,
                                 FlowFunction f,
                                 Map<Integer, Integer> height,
-                                CapacityFunction c) {
+                                CapacityFunction c,
+                                Map<Integer, List<Integer>> neighbourMap) {
         int minimumHeight = Integer.MAX_VALUE;
         
-        for (Integer v : getResidualNeighbours(digraph, u)) {
+        for (Integer v : neighbourMap.get(u)) {
             if (getResidualCapacity(u, v, f, c) > 0L) {
                 minimumHeight = Math.min(minimumHeight, height.get(v));
             }
         }
         
-        if (minimumHeight != Integer.MAX_VALUE) {
-            height.put(u, minimumHeight + 1);
+        if (minimumHeight == Integer.MAX_VALUE) {
+            throw new IllegalStateException("Cannot relabel a node " + u);
         }
+        
+        int oldHeight = height.get(u);
+        int newHeight = minimumHeight + 1;
+        
+        if (newHeight <= oldHeight) {
+            throw new IllegalStateException("Should not get here.");
+        }
+        
+        height.put(u, newHeight);
     }
     
-    private static boolean isAdmissible(DirectedGraph digraph,
-                                        Integer u,
+    private static boolean isAdmissible(Integer u,
                                         Integer v,
                                         FlowFunction f,
                                         Map<Integer, Integer> height,
@@ -213,6 +222,36 @@ public final class PushToFrontMaximumFlowFinder implements MaximumFlowFinder {
                                             FlowFunction f,
                                             CapacityFunction c) {
         return c.getArcCapacity(u, v) - f.getArcFlow(u, v);
+    }
+    
+    private static Map<Integer, List<Integer>> 
+        buildResidualNeighbourMap(DirectedGraph digraph) {
+        
+        Map<Integer, List<Integer>> neighbourMap = new HashMap<>();
+        Map<Integer, Set<Integer>> neighbourFilterMap = new HashMap<>();
+        
+        for (Integer u : digraph) {
+            neighbourMap.put(u, new ArrayList<>());
+            neighbourFilterMap.put(u, new HashSet<>());
+        }
+        
+        for (Integer u : digraph) {
+            for (Integer v : digraph.getChildrenOf(u)) {
+                addUnique(neighbourMap.get(u), neighbourFilterMap.get(u), v);
+                addUnique(neighbourMap.get(v), neighbourFilterMap.get(v), u);
+            }
+        }
+        
+        return neighbourMap;
+    }
+        
+    private static void addUnique(List<Integer> list, 
+                                  Set<Integer> filter, 
+                                  Integer node) {
+        if (!filter.contains(node)) {
+            list.add(node);
+            filter.add(node);
+        }
     }
     
     private static List<Integer> getResidualNeighbours(DirectedGraph digraph,
